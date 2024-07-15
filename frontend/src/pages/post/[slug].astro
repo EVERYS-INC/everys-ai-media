@@ -45,8 +45,8 @@ const authorImageUrl = post.attributes.author?.data?.attributes?.bioImage?.data?
   : '/placeholder-author-image.jpg';
 
 const { title, content, publishedAt } = post.attributes;
-const author = post.attributes.author?.data?.attributes;
-const category = post.attributes.category?.data?.attributes;
+const author = post.attributes.author.data?.attributes;
+const category = post.attributes.category.data?.attributes;
 
 const formattedDate = formatDate(publishedAt);
 const formattedContent = await formatMarkdown(content);
@@ -93,7 +93,7 @@ const formattedContent = await formatMarkdown(content);
         alt={`Featured image for ${title}`}
       />
     </div>
-    <article class="prose max-w-full w-full my-4">
+    <article class="prose lg:prose-xl max-w-full w-full my-4">
       <div class="rich-text" set:html={formattedContent} />
     </article>
   </div>
