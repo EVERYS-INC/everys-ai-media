@@ -1,37 +1,48 @@
 ---
-interface Props {
-  title: string;
-  body: string;
-  href: string;
-  image: string;
-  authorImage: string;
-  authorName: string;
+import Layout from "../layouts/Layout.astro";
+import Card from "../components/Card.astro";
+
+const strapiUrl = import.meta.env.STRAPI_URL;
+const strapiMediaUrl = import.meta.env.STRAPI_MEDIA_URL || 'https://passionate-dance-c4d5fc8044.media.strapiapp.com';
+
+if (!strapiUrl) {
+  throw new Error('STRAPI_URL is not defined');
 }
 
-const { href, title, body, image, authorImage, authorName } = Astro.props;
+const response = await fetch(
+  `${strapiUrl}/api/posts?populate[author][populate][0]=bioImage&populate[category]=true&populate[featuredImage]=true`
+);
+
+if (!response.ok) {
+  throw new Error(`HTTP error! status: ${response.status}`);
+}
+
+const { data } = await response.json();
 ---
 
-<div class="rounded-md overflow-hidden shadow-sm p-4 transition-transform h-auto">
-  <a href={href}>
-    <div class="rounded-md h-48 w-full overflow-hidden">
-      <img class="object-cover w-full h-full" src={image} alt={title}>
+<Layout title="Welcome to Astro.">
+  <div class="container mx-auto my-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {data.map((post) => {
+        const imageUrl = post.attributes.featuredImage?.data?.attributes?.url
+          ? new URL(post.attributes.featuredImage.data.attributes.url, strapiMediaUrl).toString()
+          : '/placeholder-image.jpg';
+
+        const authorImageUrl = post.attributes.author?.data?.attributes?.bioImage?.data?.attributes?.url
+          ? new URL(post.attributes.author.data.attributes.bioImage.data.attributes.url, strapiMediaUrl).toString()
+          : '/placeholder-author-image.jpg';
+
+        return (
+          <Card
+            title={post.attributes.title}
+            body={post.attributes.description}
+            href={`/post/${post.attributes.slug}`}
+            image={imageUrl}
+            authorImage={authorImageUrl}
+            authorName={post.attributes.author?.data?.attributes?.name || 'Unknown Author'}
+          />
+        );
+      })}
     </div>
-    <div>
-      <h1 class="my-2 font-bold text-xl text-gray-900">{title}</h1>
-      <p class="my-2 text-gray-700 line-clamp-3">{body}</p>
-    </div>
-    <div class="flex justify-between my-4 items-center">
-      <div class="flex space-x-2 items-center overflow-hidden">
-        <img class="inline-block h-8 w-8 rounded-full ring-2 ring-white" src={authorImage} alt={`${authorName}'s picture`}>
-        <p class="font-medium text-xs text-gray-600 cursor-pointer">
-          {authorName}
-        </p>
-      </div>
-      <div class="inline-flex rounded-md">
-        <a href={href} class="inline-flex items-center justify-center px-5 py-2 border border-transparent text-base font-medium rounded-md text-white bg-yellow-500 hover:bg-yellow-400">
-          Read article
-        </a>
-      </div>
-    </div>
-  </a>
-</div>
+  </div>
+</Layout>
