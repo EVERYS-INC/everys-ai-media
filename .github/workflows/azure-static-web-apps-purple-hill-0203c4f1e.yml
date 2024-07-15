@@ -30,9 +30,15 @@ jobs:
           cd frontend
           npm install
 
+      - name: Load environment variables
+        run: |
+          cd frontend
+          echo "STRAPI_URL=$(grep STRAPI_URL .env | cut -d '=' -f2)" >> $GITHUB_ENV
+
       - name: Build
         run: |
           cd frontend
+          echo "STRAPI_URL: $STRAPI_URL"
           npm run build
 
       - name: Build And Deploy
