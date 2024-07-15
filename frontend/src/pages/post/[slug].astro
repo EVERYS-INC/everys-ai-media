@@ -20,10 +20,8 @@ export async function getStaticPaths() {
 
 const { post } = Astro.props;
 
-// 新しく追加: STRAPI_MEDIA_URL の取得
 const strapiMediaUrl = import.meta.env.STRAPI_MEDIA_URL || 'https://passionate-dance-c4d5fc8044.media.strapiapp.com';
 
-// 画像URL生成の修正
 const imageUrl = post.attributes.featuredImage?.data?.attributes?.url
   ? `${strapiMediaUrl}${post.attributes.featuredImage.data.attributes.url}`
   : '/placeholder-image.jpg';
