@@ -1,21 +1,35 @@
 ---
-import Layout from "../../layouts/Layout.astro";
-import { formatDate, formatMarkdown } from "../../utils";
-import BackButton from "../../components/BackButton.astro";
+import Layout from "@/layouts/Layout.astro";
+import { formatDate, formatMarkdown } from "@/utils";
+import BackButton from "@/components/BackButton.astro";
 
 export async function getStaticPaths() {
   const strapiUrl = import.meta.env.STRAPI_URL;
 
-  const response = await fetch(
-    `${strapiUrl}/api/posts?populate[author][populate][0]=bioImage&populate[category]=true&populate[featuredImage]=true`
-  );
+  if (!strapiUrl) {
+    console.error('STRAPI_URL is not defined');
+    return [];
+  }
 
-  const { data } = await response.json();
+  try {
+    const response = await fetch(
+      `${strapiUrl}/api/posts?populate[author][populate][0]=bioImage&populate[category]=true&populate[featuredImage]=true`
+    );
 
-  return data.map((post) => ({
-    params: { slug: post.attributes.slug },
-    props: { post },
-  }));
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const { data } = await response.json();
+
+    return data.map((post) => ({
+      params: { slug: post.attributes.slug },
+      props: { post },
+    }));
+  } catch (error) {
+    console.error('Error fetching posts:', error);
+    return [];
+  }
 }
 
 const { post } = Astro.props;
@@ -50,23 +64,27 @@ const formattedContent = await formatMarkdown(content);
           <img
             class="inline-block h-8 w-8 rounded-full ring-2 ring-white"
             src={authorImageUrl}
-            alt="author picture"
+            alt={`${author?.name || 'Author'}'s profile picture`}
           />
           <p class="font-medium text-xs text-gray-600 cursor-pointer">
-            {author?.name}
+            {author?.name || 'Unknown Author'}
           </p>
         </span>
         <span>&middot;</span>
         <span>{formattedDate}</span>
-        <span>&middot;</span>
-        <span>{category?.name}</span>
+        {category && (
+          <>
+            <span>&middot;</span>
+            <span>{category.name}</span>
+          </>
+        )}
       </div>
     </div>
     <div class="rounded-md h-56 w-full overflow-hidden">
       <img
         class="object-cover w-full h-full"
         src={imageUrl}
-        alt={title}
+        alt={`Featured image for ${title}`}
       />
     </div>
     <article class="prose max-w-full w-full my-4">

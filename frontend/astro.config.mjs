@@ -1,5 +1,6 @@
 import { defineConfig } from 'astro/config';
 import tailwind from "@astrojs/tailwind";
+import path from 'path';
 
 export default defineConfig({
   integrations: [tailwind()],
@@ -7,7 +8,7 @@ export default defineConfig({
     plugins: [],
     resolve: {
       alias: {
-        'src': '/src'
+        '@': path.resolve('./src')
       }
     },
     define: {
