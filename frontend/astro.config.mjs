@@ -1,8 +1,13 @@
 import { defineConfig } from 'astro/config';
-
 import tailwind from "@astrojs/tailwind";
 
-// https://astro.build/config
 export default defineConfig({
-  integrations: [tailwind()]
+  integrations: [tailwind()],
+  vite: {
+    plugins: [],
+    define: {
+      'import.meta.env.STRAPI_URL': JSON.stringify(process.env.STRAPI_URL),
+      'import.meta.env.STRAPI_MEDIA_URL': JSON.stringify(process.env.STRAPI_MEDIA_URL),
+    },
+  },
 });
