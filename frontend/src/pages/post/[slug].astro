@@ -37,16 +37,16 @@ const { post } = Astro.props;
 const strapiMediaUrl = import.meta.env.STRAPI_MEDIA_URL || 'https://passionate-dance-c4d5fc8044.media.strapiapp.com';
 
 const imageUrl = post.attributes.featuredImage?.data?.attributes?.url
-  ? `${strapiMediaUrl}${post.attributes.featuredImage.data.attributes.url}`
+  ? new URL(post.attributes.featuredImage.data.attributes.url, strapiMediaUrl).toString()
   : '/placeholder-image.jpg';
 
 const authorImageUrl = post.attributes.author?.data?.attributes?.bioImage?.data?.attributes?.url
-  ? `${strapiMediaUrl}${post.attributes.author.data.attributes.bioImage.data.attributes.url}`
+  ? new URL(post.attributes.author.data.attributes.bioImage.data.attributes.url, strapiMediaUrl).toString()
   : '/placeholder-author-image.jpg';
 
 const { title, content, publishedAt } = post.attributes;
-const author = post.attributes.author.data?.attributes;
-const category = post.attributes.category.data?.attributes;
+const author = post.attributes.author?.data?.attributes;
+const category = post.attributes.category?.data?.attributes;
 
 const formattedDate = formatDate(publishedAt);
 const formattedContent = await formatMarkdown(content);
@@ -60,18 +60,24 @@ const formattedContent = await formatMarkdown(content);
         {title}
       </h1>
       <div class="text-gray-500 flex justify-center items-center space-x-2">
-        <span class="flex space-x-2 items-center overflow-hidden">
-          <img
-            class="inline-block h-8 w-8 rounded-full ring-2 ring-white"
-            src={authorImageUrl}
-            alt={`${author?.name || 'Author'}'s profile picture`}
-          />
-          <p class="font-medium text-xs text-gray-600 cursor-pointer">
-            {author?.name || 'Unknown Author'}
-          </p>
-        </span>
-        <span>&middot;</span>
-        <span>{formattedDate}</span>
+        {author && (
+          <span class="flex space-x-2 items-center overflow-hidden">
+            <img
+              class="inline-block h-8 w-8 rounded-full ring-2 ring-white"
+              src={authorImageUrl}
+              alt={`${author.name || 'Author'}'s profile picture`}
+            />
+            <p class="font-medium text-xs text-gray-600 cursor-pointer">
+              {author.name || 'Unknown Author'}
+            </p>
+          </span>
+        )}
+        {publishedAt && (
+          <>
+            <span>&middot;</span>
+            <span>{formattedDate}</span>
+          </>
+        )}
         {category && (
           <>
             <span>&middot;</span>
