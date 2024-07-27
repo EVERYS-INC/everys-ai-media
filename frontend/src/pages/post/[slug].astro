@@ -1,100 +1,38 @@
 ---
-import Layout from "@/layouts/Layout.astro";
-import { formatDate, formatMarkdown } from "@/utils";
-import BackButton from "@/components/BackButton.astro";
+import ArticleLayout from "../../layouts/ArticleLayout.astro";
+import { marked } from 'marked';
 
+// 静的ページ生成のためのパスを定義
 export async function getStaticPaths() {
   const strapiUrl = import.meta.env.STRAPI_URL;
+  const response = await fetch(`${strapiUrl}/api/posts?populate=*`);
+  const { data } = await response.json();
 
-  if (!strapiUrl) {
-    console.error('STRAPI_URL is not defined');
-    return [];
-  }
-
-  try {
-    const response = await fetch(
-      `${strapiUrl}/api/posts?populate[author][populate][0]=bioImage&populate[category]=true&populate[featuredImage]=true`
-    );
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const { data } = await response.json();
-
-    return data.map((post) => ({
-      params: { slug: post.attributes.slug },
-      props: { post },
-    }));
-  } catch (error) {
-    console.error('Error fetching posts:', error);
-    return [];
-  }
+  // 各記事に対してパラメータとプロップを生成
+  return data.map((post) => ({
+    params: { slug: post.attributes.slug },
+    props: { post },
+  }));
 }
 
+// 現在のページの記事データを取得
 const { post } = Astro.props;
 
-const strapiMediaUrl = import.meta.env.STRAPI_MEDIA_URL || 'https://passionate-dance-c4d5fc8044.media.strapiapp.com';
+// サイドバー用の最新記事を取得
+const strapiUrl = import.meta.env.STRAPI_URL;
+const recentPostsResponse = await fetch(
+  `${strapiUrl}/api/posts?sort[0]=createdAt:desc&pagination[limit]=5`
+);
+const { data: recentPosts } = await recentPostsResponse.json();
 
-const imageUrl = post.attributes.featuredImage?.data?.attributes?.url
-  ? new URL(post.attributes.featuredImage.data.attributes.url, strapiMediaUrl).toString()
-  : '/placeholder-image.jpg';
-
-const authorImageUrl = post.attributes.author?.data?.attributes?.bioImage?.data?.attributes?.url
-  ? new URL(post.attributes.author.data.attributes.bioImage.data.attributes.url, strapiMediaUrl).toString()
-  : '/placeholder-author-image.jpg';
-
-const { title, content, publishedAt } = post.attributes;
-const author = post.attributes.author.data?.attributes;
-const category = post.attributes.category.data?.attributes;
-
-const formattedDate = formatDate(publishedAt);
-const formattedContent = await formatMarkdown(content);
+// マークダウンコンテンツをHTMLに変換
+const content = marked(post.attributes.content);
 ---
 
-<Layout title={title}>
-  <div class="container mx-auto">
-    <BackButton />
-    <div class="my-4 text-center">
-      <h1 class="text-center text-4xl leading-tight text-gray-900 my-4 font-bold">
-        {title}
-      </h1>
-      <div class="text-gray-500 flex justify-center items-center space-x-2">
-        {author && (
-          <span class="flex space-x-2 items-center overflow-hidden">
-            <img
-              class="inline-block h-8 w-8 rounded-full ring-2 ring-white"
-              src={authorImageUrl}
-              alt={`${author.name || 'Author'}'s profile picture`}
-            />
-            <p class="font-medium text-xs text-gray-600 cursor-pointer">
-              {author.name || 'Unknown Author'}
-            </p>
-          </span>
-        )}
-        {publishedAt && (
-          <>
-            <span>&middot;</span>
-            <span>{formattedDate}</span>
-          </>
-        )}
-        {category && (
-          <>
-            <span>&middot;</span>
-            <span>{category.name}</span>
-          </>
-        )}
-      </div>
-    </div>
-    <div class="rounded-md h-56 w-full overflow-hidden">
-      <img
-        class="object-cover w-full h-full"
-        src={imageUrl}
-        alt={`Featured image for ${title}`}
-      />
-    </div>
-    <article class="prose lg:prose-xl max-w-full w-full my-4">
-      <div class="rich-text" set:html={formattedContent} />
-    </article>
-  </div>
-</Layout>
+<!-- ArticleLayoutを適用し、記事内容を表示 -->
+<ArticleLayout title={post.attributes.title} recentPosts={recentPosts}>
+  <article>
+    <h1 class="text-3xl font-bold mb-4">{post.attributes.title}</h1>
+    <div set:html={content} />
+  </article>
+</ArticleLayout>

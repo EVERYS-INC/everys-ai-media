@@ -1,0 +1,18 @@
+---
+// src/layouts/ArticleLayout.astro
+import Layout from "./Layout.astro";
+import Sidebar from "../components/Sidebar.astro";
+
+const { title, recentPosts } = Astro.props;
+---
+
+<Layout title={title}>
+  <div class="container mx-auto my-4 flex">
+    <div class="w-3/4 pr-6">
+      <slot />
+    </div>
+    <div class="w-1/4">
+      <Sidebar recentPosts={recentPosts} />
+    </div>
+  </div>
+</Layout>
