@@ -2,35 +2,30 @@
 import ArticleLayout from "../../layouts/ArticleLayout.astro";
 import { marked } from 'marked';
 
-// 静的ページ生成のためのパスを定義
-export async function getStaticPaths() {
-  const strapiUrl = import.meta.env.STRAPI_URL;
-  const response = await fetch(`${strapiUrl}/api/posts?populate=*`);
-  const { data } = await response.json();
+// ... その他のインポートと関数 ...
 
-  // 各記事に対してパラメータとプロップを生成
-  return data.map((post) => ({
-    params: { slug: post.attributes.slug },
-    props: { post },
-  }));
-}
-
-// 現在のページの記事データを取得
 const { post } = Astro.props;
 
-// サイドバー用の最新記事を取得
-const strapiUrl = import.meta.env.STRAPI_URL;
+// 人気の記事を取得
+const popularPostsResponse = await fetch(
+  `${strapiUrl}/api/posts?sort[0]=viewCount:desc&pagination[limit]=5&fields[0]=title&fields[1]=slug`
+);
+const { data: popularPosts } = await popularPostsResponse.json();
+
+// 最新の記事を取得
 const recentPostsResponse = await fetch(
-  `${strapiUrl}/api/posts?sort[0]=createdAt:desc&pagination[limit]=5`
+  `${strapiUrl}/api/posts?sort[0]=createdAt:desc&pagination[limit]=5&fields[0]=title&fields[1]=slug`
 );
 const { data: recentPosts } = await recentPostsResponse.json();
 
-// マークダウンコンテンツをHTMLに変換
 const content = marked(post.attributes.content);
 ---
 
-<!-- ArticleLayoutを適用し、記事内容を表示 -->
-<ArticleLayout title={post.attributes.title} recentPosts={recentPosts}>
+<ArticleLayout 
+  title={post.attributes.title} 
+  recentPosts={recentPosts}
+  popularPosts={popularPosts}
+>
   <article>
     <h1 class="text-3xl font-bold mb-4">{post.attributes.title}</h1>
     <div set:html={content} />
