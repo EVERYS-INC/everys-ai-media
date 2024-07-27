@@ -24,7 +24,6 @@ const { data } = await response.json();
 const recentPosts = data.slice(0, 5);
 ---
 
-
 <Layout title="EVERYS.AI  |  マルチAIエージェント技術を駆使したAI駆動技術専門メディアtest">
   <div class="container mx-auto my-4 flex">
     <div class="w-3/4 pr-6">
@@ -52,7 +51,7 @@ const recentPosts = data.slice(0, 5);
       </div>
     </div>
     <div class="w-1/4">
-      <Sidebar />
+      <Sidebar recentPosts={recentPosts} />
     </div>
   </div>
 </Layout>
