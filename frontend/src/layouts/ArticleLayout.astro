@@ -2,7 +2,7 @@
 import Layout from "./Layout.astro";
 import Sidebar from "../components/Sidebar.astro";
 
-const { title, recentPosts, popularPosts } = Astro.props;
+const { title, recentPosts } = Astro.props;
 ---
 
 <Layout title={title}>
@@ -11,7 +11,7 @@ const { title, recentPosts, popularPosts } = Astro.props;
       <slot />
     </div>
     <div class="w-1/4">
-      <Sidebar recentPosts={recentPosts} popularPosts={popularPosts} />
+      <Sidebar recentPosts={recentPosts} />
     </div>
   </div>
 </Layout>

@@ -31,12 +31,6 @@ const { post } = Astro.props;
 
 const strapiUrl = import.meta.env.STRAPI_URL;
 
-// 人気の記事を取得（上位5件）
-//const popularPostsResponse = await fetch(
-//  `${strapiUrl}/api/posts?sort[0]=viewCount:desc&pagination[limit]=5&fields[0]=title&fields[1]=slug`
-//);
-//const { data: popularPosts } = await popularPostsResponse.json();
-
 // 最新の記事を取得（最新5件）
 const recentPostsResponse = await fetch(
   `${strapiUrl}/api/posts?sort[0]=createdAt:desc&pagination[limit]=5&fields[0]=title&fields[1]=slug`
@@ -49,7 +43,6 @@ const content = marked(post.attributes.content);
 <ArticleLayout 
   title={post.attributes.title} 
   recentPosts={recentPosts}
-  popularPosts={popularPosts}
 >
   <article>
     <h1 class="text-3xl font-bold mb-4">{post.attributes.title}</h1>
