@@ -2,17 +2,42 @@
 import ArticleLayout from "../../layouts/ArticleLayout.astro";
 import { marked } from 'marked';
 
-// ... その他のインポートと関数 ...
+export async function getStaticPaths() {
+  const strapiUrl = import.meta.env.STRAPI_URL;
+  const postsPerPage = 100; // 一度に取得する投稿数
+  let page = 1;
+  let hasMorePosts = true;
+  let allPosts = [];
+
+  while (hasMorePosts) {
+    const response = await fetch(
+      `${strapiUrl}/api/posts?populate=*&pagination[page]=${page}&pagination[pageSize]=${postsPerPage}`
+    );
+    const { data, meta } = await response.json();
+    
+    allPosts = allPosts.concat(data);
+    
+    hasMorePosts = meta.pagination.page < meta.pagination.pageCount;
+    page++;
+  }
+
+  return allPosts.map((post) => ({
+    params: { slug: post.attributes.slug },
+    props: { post },
+  }));
+}
 
 const { post } = Astro.props;
 
-// 人気の記事を取得
-const popularPostsResponse = await fetch(
-  `${strapiUrl}/api/posts?sort[0]=viewCount:desc&pagination[limit]=5&fields[0]=title&fields[1]=slug`
-);
-const { data: popularPosts } = await popularPostsResponse.json();
+const strapiUrl = import.meta.env.STRAPI_URL;
 
-// 最新の記事を取得
+// 人気の記事を取得（上位5件）
+//const popularPostsResponse = await fetch(
+//  `${strapiUrl}/api/posts?sort[0]=viewCount:desc&pagination[limit]=5&fields[0]=title&fields[1]=slug`
+//);
+//const { data: popularPosts } = await popularPostsResponse.json();
+
+// 最新の記事を取得（最新5件）
 const recentPostsResponse = await fetch(
   `${strapiUrl}/api/posts?sort[0]=createdAt:desc&pagination[limit]=5&fields[0]=title&fields[1]=slug`
 );
