@@ -11,7 +11,7 @@ if (!strapiUrl) {
 }
 
 const response = await fetch(
-  `${strapiUrl}/api/posts?populate[author][populate][0]=bioImage&populate[category]=true&populate[featuredImage]=true`
+  `${strapiUrl}/api/posts?populate[author][populate][0]=bioImage&populate[category]=true&populate[featuredImage]=true&sort[0]=createdAt:desc`
 );
 
 if (!response.ok) {
@@ -19,7 +19,11 @@ if (!response.ok) {
 }
 
 const { data } = await response.json();
+
+// 最新の5つの記事を取得
+const recentPosts = data.slice(0, 5);
 ---
+
 
 <Layout title="EVERYS.AI  |  マルチAIエージェント技術を駆使したAI駆動技術専門メディアtest">
   <div class="container mx-auto my-4 flex">

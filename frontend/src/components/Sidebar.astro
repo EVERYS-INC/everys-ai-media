@@ -1,5 +1,17 @@
 ---
 // src/components/Sidebar.astro
+interface Post {
+  attributes: {
+    title: string;
+    slug: string;
+  };
+}
+
+interface Props {
+  recentPosts: Post[];
+}
+
+const { recentPosts } = Astro.props;
 ---
 
 <aside class="bg-gray-100 p-4 rounded-lg">
@@ -14,9 +26,13 @@
   <div class="mt-4">
     <h3 class="font-semibold mb-2">最新の投稿</h3>
     <ul>
-      <li><a href="#" class="text-sm text-gray-700 hover:underline">記事1のタイトル</a></li>
-      <li><a href="#" class="text-sm text-gray-700 hover:underline">記事2のタイトル</a></li>
-      <li><a href="#" class="text-sm text-gray-700 hover:underline">記事3のタイトル</a></li>
+      {recentPosts.map((post) => (
+        <li>
+          <a href={`/post/${post.attributes.slug}`} class="text-sm text-gray-700 hover:underline">
+            {post.attributes.title}
+          </a>
+        </li>
+      ))}
     </ul>
   </div>
 </aside>
