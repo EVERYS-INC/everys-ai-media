@@ -7,19 +7,13 @@ const { title, recentPosts } = Astro.props;
 
 <Layout title={title}>
   <div class="container mx-auto my-4 flex relative">
-    <div class="w-3/4 pr-6">
+    <div class="w-3/4 pr-8">
       <slot />
     </div>
     <div class="w-1/4 absolute top-0 right-0 h-full">
-      <div class="sticky top-4">
+      <div class="sticky top-4 pr-4">
         <Sidebar recentPosts={recentPosts} />
       </div>
     </div>
   </div>
 </Layout>
-
-<style>
-  .container {
-    min-height: 100vh;
-  }
-</style>
