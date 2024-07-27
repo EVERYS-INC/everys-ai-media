@@ -1,6 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Card from "../components/Card.astro";
+import Sidebar from "../components/Sidebar.astro";
 
 const strapiUrl = import.meta.env.STRAPI_URL;
 const strapiMediaUrl = import.meta.env.STRAPI_MEDIA_URL || 'https://passionate-dance-c4d5fc8044.media.strapiapp.com';
@@ -21,28 +22,33 @@ const { data } = await response.json();
 ---
 
 <Layout title="EVERYS.AI  |  マルチAIエージェント技術を駆使したAI駆動技術専門メディアtest">
-  <div class="container mx-auto my-4">
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {data.map((post) => {
-        const imageUrl = post.attributes.featuredImage?.data?.attributes?.url
-          ? new URL(post.attributes.featuredImage.data.attributes.url, strapiMediaUrl).toString()
-          : '/placeholder-image.jpg';
+  <div class="container mx-auto my-4 flex">
+    <div class="w-3/4 pr-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {data.map((post) => {
+          const imageUrl = post.attributes.featuredImage?.data?.attributes?.url
+            ? new URL(post.attributes.featuredImage.data.attributes.url, strapiMediaUrl).toString()
+            : '/placeholder-image.jpg';
 
-        const authorImageUrl = post.attributes.author?.data?.attributes?.bioImage?.data?.attributes?.url
-          ? new URL(post.attributes.author.data.attributes.bioImage.data.attributes.url, strapiMediaUrl).toString()
-          : '/placeholder-author-image.jpg';
+          const authorImageUrl = post.attributes.author?.data?.attributes?.bioImage?.data?.attributes?.url
+            ? new URL(post.attributes.author.data.attributes.bioImage.data.attributes.url, strapiMediaUrl).toString()
+            : '/placeholder-author-image.jpg';
 
-        return (
-          <Card
-            title={post.attributes.title}
-            body={post.attributes.description}
-            href={`/post/${post.attributes.slug}`}
-            image={imageUrl}
-            authorImage={authorImageUrl}
-            authorName={post.attributes.author?.data?.attributes?.name || 'Unknown Author'}
-          />
-        );
-      })}
+          return (
+            <Card
+              title={post.attributes.title}
+              body={post.attributes.description}
+              href={`/post/${post.attributes.slug}`}
+              image={imageUrl}
+              authorImage={authorImageUrl}
+              authorName={post.attributes.author?.data?.attributes?.name || 'Unknown Author'}
+            />
+          );
+        })}
+      </div>
+    </div>
+    <div class="w-1/4">
+      <Sidebar />
     </div>
   </div>
 </Layout>
