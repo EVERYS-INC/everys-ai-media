@@ -4,24 +4,10 @@ import { marked } from 'marked';
 
 export async function getStaticPaths() {
   const strapiUrl = import.meta.env.STRAPI_URL;
-  const postsPerPage = 100; // 一度に取得する投稿数
-  let page = 1;
-  let hasMorePosts = true;
-  let allPosts = [];
+  const response = await fetch(`${strapiUrl}/api/posts?populate=*`);
+  const { data } = await response.json();
 
-  while (hasMorePosts) {
-    const response = await fetch(
-      `${strapiUrl}/api/posts?populate=*&pagination[page]=${page}&pagination[pageSize]=${postsPerPage}`
-    );
-    const { data, meta } = await response.json();
-    
-    allPosts = allPosts.concat(data);
-    
-    hasMorePosts = meta.pagination.page < meta.pagination.pageCount;
-    page++;
-  }
-
-  return allPosts.map((post) => ({
+  return data.map((post) => ({
     params: { slug: post.attributes.slug },
     props: { post },
   }));
@@ -37,6 +23,7 @@ const recentPostsResponse = await fetch(
 );
 const { data: recentPosts } = await recentPostsResponse.json();
 
+// マークダウンをHTMLに変換
 const content = marked(post.attributes.content);
 ---
 
