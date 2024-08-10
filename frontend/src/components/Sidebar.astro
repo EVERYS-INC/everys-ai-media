@@ -7,35 +7,38 @@ interface Post {
 }
 
 interface Props {
-  recentPosts: Post[];
+  recentPosts?: Post[];
 }
 
-const { recentPosts } = Astro.props;
+const { recentPosts = [] } = Astro.props;
+
+// デバッグ用のログ
+console.log("Sidebar recentPosts:", JSON.stringify(recentPosts, null, 2));
 ---
 
-<aside class="bg-gray-100 p-4 rounded-lg overflow-y-auto max-h-screen flex flex-col">
-  <div class="mb-6 flex justify-center">
-    <a href="/" class="inline-block">
-      <img src="favicon.png" alt="EVERYS" class="w-32 h-auto"/>
-    </a>
-  </div>
-  <nav class="mb-6">
+<aside class="bg-gray-100 p-4 rounded-lg">
+  <h2 class="text-xl font-bold mb-4">サイドバー</h2>
+  <nav>
     <ul>
       <li><a href="/" class="text-blue-600 hover:underline">ホーム</a></li>
       <li><a href="/about" class="text-blue-600 hover:underline">About</a></li>
       <li><a href="/contact" class="text-blue-600 hover:underline">お問い合わせ</a></li>
     </ul>
   </nav>
-  <div class="mt-4 flex-grow">
+  <div class="mt-4">
     <h3 class="font-semibold mb-2">最新の投稿</h3>
-    <ul>
-      {recentPosts.map((post) => (
-        <li class="mb-2">
-          <a href={`/post/${post.attributes.slug}`} class="text-sm text-gray-700 hover:underline">
-            {post.attributes.title}
-          </a>
-        </li>
-      ))}
-    </ul>
+    {recentPosts.length > 0 ? (
+      <ul>
+        {recentPosts.map((post) => (
+          <li>
+            <a href={`/post/${post.attributes.slug}`} class="text-sm text-gray-700 hover:underline">
+              {post.attributes.title}
+            </a>
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p>最新の投稿はありません。</p>
+    )}
   </div>
 </aside>
