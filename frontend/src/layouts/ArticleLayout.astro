@@ -6,25 +6,17 @@ const { title, recentPosts = [] } = Astro.props;
 ---
 
 <Layout title={title}>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-okaidia.min.css" />
-  <div class="container mx-auto my-4 flex">
-    <div class="w-3/4 pr-6">
-      <slot />
-    </div>
-    <div class="w-1/4">
-      <Sidebar recentPosts={recentPosts} />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css" />
+  <div class="container mx-auto px-4 py-16">
+    <div class="flex flex-col lg:flex-row gap-16">
+      <main class="lg:w-2/3">
+        <slot />
+      </main>
+      <aside class="lg:w-1/3">
+        <Sidebar recentPosts={recentPosts} />
+      </aside>
     </div>
   </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-core.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/autoloader/prism-autoloader.min.js"></script>
 </Layout>
-
-<style is:global>
-  pre[class*="language-"] {
-    border-radius: 0.5rem;
-    margin: 1rem 0;
-  }
-  code[class*="language-"] {
-    font-size: 0.9rem;
-  }
-</style>

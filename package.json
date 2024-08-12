@@ -11,6 +11,9 @@
     "repo:upstream": "git fetch upstream && git merge upstream/main"
   },
   "dependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "marked": "^14.0.0",
+    "marked-highlight": "^2.1.4",
+    "prismjs": "^1.29.0"
   }
 }

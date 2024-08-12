@@ -1,70 +1,54 @@
 ---
 import ArticleLayout from "../../layouts/ArticleLayout.astro";
 import { marked } from 'marked';
+import { markedHighlight } from "marked-highlight";
+
+// markedの設定をカスタマイズ
+marked.use(
+  markedHighlight({
+    highlight: function(code, lang) {
+      // ハイライトの実装（前回の回答を参照）
+    }
+  })
+);
 
 export async function getStaticPaths() {
   const strapiUrl = import.meta.env.STRAPI_URL;
-  if (!strapiUrl) {
-    console.error("STRAPI_URL is not defined in environment variables");
-    return [];
-  }
+  const response = await fetch(`${strapiUrl}/api/posts?populate=*`);
+  const { data } = await response.json();
 
-  try {
-    const response = await fetch(`${strapiUrl}/api/posts?populate=*`);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const result = await response.json();
-
-    if (!result.data || !Array.isArray(result.data)) {
-      console.error("Unexpected API response structure:", result);
-      return [];
-    }
-
-    return result.data.map((post) => ({
-      params: { slug: post.attributes.slug },
-      props: { post },
-    }));
-  } catch (error) {
-    console.error("Error in getStaticPaths:", error);
-    return [];
-  }
-}
-
-const { post } = Astro.props;
-
-// markedの設定をカスタマイズ
-marked.setOptions({
-  highlight: function(code, lang) {
-    return `<pre><code class="language-${lang}">${code}</code></pre>`;
-  }
-});
-
-const content = post?.attributes?.content ? marked(post.attributes.content) : '';
-
-// 最新の記事を取得（最新5件）
-const strapiUrl = import.meta.env.STRAPI_URL;
-let recentPosts = [];
-try {
+  // 最新の記事を取得（最新5件）
   const recentPostsResponse = await fetch(
     `${strapiUrl}/api/posts?sort[0]=createdAt:desc&pagination[limit]=5&fields[0]=title&fields[1]=slug`
   );
-  if (!recentPostsResponse.ok) {
-    throw new Error(`HTTP error! status: ${recentPostsResponse.status}`);
-  }
-  const recentPostsData = await recentPostsResponse.json();
-  recentPosts = recentPostsData.data || [];
-} catch (error) {
-  console.error("Error fetching recent posts:", error);
+  const { data: recentPosts } = await recentPostsResponse.json();
+
+  return data.map((post) => ({
+    params: { slug: post.attributes.slug },
+    props: { post, recentPosts },
+  }));
 }
+
+const { post, recentPosts } = Astro.props;
+
+const content = post?.attributes?.content ? marked.parse(post.attributes.content) : '';
+
+// featuredImageのURLを取得
+const featuredImageUrl = post.attributes.featuredImage?.data?.attributes?.url
+  ? new URL(post.attributes.featuredImage.data.attributes.url, import.meta.env.STRAPI_MEDIA_URL).toString()
+  : null;
+
+// カテゴリーを取得
+const category = post.attributes.category?.data?.attributes?.name || 'Uncategorized';
 ---
 
 <ArticleLayout 
   title={post?.attributes?.title || 'No Title'}
   recentPosts={recentPosts}
 >
-  <article class="prose lg:prose-xl">
-    <h1 class="text-3xl font-bold mb-4">{post?.attributes?.title || 'No Title'}</h1>
-    <div set:html={content} />
+  <article class="max-w-3xl mx-auto px-4">
+    <!-- 記事の内容 -->
   </article>
 </ArticleLayout>
+
+<!-- スタイル -->
